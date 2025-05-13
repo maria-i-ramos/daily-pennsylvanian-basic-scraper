@@ -5,7 +5,7 @@ JSON file that tracks headlines over time.
 
 import os
 import sys
-
+import json  # Import JSON to handle file creation
 import daily_event_monitor
 
 import bs4
@@ -45,21 +45,20 @@ if __name__ == "__main__":
         loguru.logger.error(f"Failed to create data directory: {e}")
         sys.exit(1)
 
+    # Ensure the JSON file exists
+    json_file_path = "data/daily_pennsylvanian_headlines.json"
+    if not os.path.isfile(json_file_path):
+        loguru.logger.info("File does not exist, creating an empty JSON file")
+        try:
+            with open(json_file_path, "w") as f:
+                json.dump([], f)  # Initialize with an empty list
+        except Exception as e:
+            loguru.logger.error(f"Failed to create the JSON file: {e}")
+            sys.exit(1)
+
     # Load daily event monitor
     loguru.logger.info("Loading daily event monitor")
-    dem = daily_event_monitor.DailyEventMonitor(
-        "data/daily_pennsylvanian_headlines.json"
-    )
-
-    # Check and create the file if it doesn't exist
-    if not os.path.exists(dem.file_path):
-        loguru.logger.warning(f"File {dem.file_path} does not exist. Creating an empty file.")
-        with open(dem.file_path, "w") as f:
-            f.write("[]")  # Initialize with an empty JSON array or appropriate content.
-
-    # Read and log the file contents
-    with open(dem.file_path, "r") as f:
-        loguru.logger.info(f.read())
+    dem = daily_event_monitor.DailyEventMonitor(json_file_path)
 
     # Run scrape
     loguru.logger.info("Starting scrape")
@@ -89,13 +88,8 @@ if __name__ == "__main__":
     print_tree(os.getcwd())
 
     loguru.logger.info("Printing contents of data file {}".format(dem.file_path))
-    if not os.path.exists(dem.file_path):
-        loguru.logger.info(f"File {dem.file_path} does not exist. Creating an empty file.")
-        with open(dem.file_path, "w") as f:
-            f.write("{}")  # Write an empty JSON object or any initial content you need.
-
-with open(dem.file_path, "r") as f:
-    loguru.logger.info(f.read())
+    with open(dem.file_path, "r") as f:
+        loguru.logger.info(f.read())
 
     # Finish
     loguru.logger.info("Scrape complete")
