@@ -1,4 +1,10 @@
-# Basic Git Scraper Template
+# 📰 Daily Pennsylvanian Basic Scraper
+
+This project is a simple Python-based web scraper designed to extract article headlines from *The Daily Pennsylvanian* website and store them in a JSON file. It is automatically scheduled to run twice daily using GitHub Actions and serves as an ongoing data collection tool for news analysis.
+
+---
+
+## Basic Git Scraper Template
 
 This template provides a starting point for **git scraping**—the technique of scraping data from websites and automatically committing it to a Git repository using workflows, [coined by Simon Willison](https://simonwillison.net/2020/Oct/9/git-scraping/).
 
@@ -10,51 +16,145 @@ Tools like GitHub Actions, GitLab CI and others make git scraping adaptable to d
 
 This template includes a sample workflow to demonstrate the core git scraping capabilities. Read on to learn how to customize it!
 
+---
+
 ## Overview
 
 The workflow defined in `.github/workflows/scrape.yaml` runs on a defined schedule to:
 
-1. Checkout the code
-2. Set up the Python environment
-3. Install dependencies via Pipenv
-4. Run the python script `script.py` to scrape data
+1. Checkout the code  
+2. Set up the Python environment  
+3. Install dependencies via Pipenv  
+4. Run the python script `script.py` to scrape data  
 5. Commit any updated data files to the Git repository
 
-## Scheduling
+---
 
-The workflow schedule is configured with [cron syntax](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule) to run:
+## 🧠 Initial Scraper Explanation
 
-- Every day at 8PM UTC
+The original scraper targeted the **main headline** on [https://www.thedp.com](https://www.thedp.com). It used Python’s `requests` library to fetch the HTML of the homepage and `BeautifulSoup` to parse and select the main headline using a CSS selector. The extracted data was appended to a JSON file to preserve a longitudinal timeline of headline changes.
 
-This once-daily scraping is a good rule-of-thumb, as it is generally respectful of the target website, as it does not contribute to any measurable burden to the site's resources.
+A full explanation is provided in the file `INITIAL-SCRAPER-EXPLANATION.pdf`.
+
+---
+
+## ✏️ Scraper Modification – Most Read Article
+
+Originally, the scraper pulled the main headline from the DP homepage. I updated it to instead scrape the **#1 most read article** from the “Most Read” section at the bottom of the homepage.
+
+### Reason for This Change:
+The main headline often varies by editorial priority, but the most-read article reflects **actual reader engagement**, making it useful for analysis of content virality and student interests over time.
+
+### How It Works:
+- I inspected the homepage HTML using the browser’s Developer Tools.
+- I located the most-read articles in a list under the `most-read` container.
+- I identified the first `<li>` item as the top article.
+- I updated the CSS selector in the scraper to target this element specifically.
+
+This change improves the scraper by targeting the content most interesting to readers rather than just the editorial top story.
+
+---
+
+## ⏰ GitHub Actions Schedule
+
+This scraper is automated using GitHub Actions. The workflow file is located at:
+
+```
+.github/workflows/scrape.yaml
+```
+
+### Cron Schedule:
+
+```yaml
+schedule:
+  - cron: "0 12,20 * * *"
+```
+
+### Interpretation:
+The cron expression means that the scraper will run twice a day: once at **12:00 UTC** and once at **20:00 UTC** every day.
+
+The five fields represent:
+- `minute` (0)
+- `hour` (12 and 20)
+- `day of month` (*, meaning every day)
+- `month` (*, meaning every month)
+- `day of week` (*, meaning every day of the week)
+
+This increases reliability by giving the scraper two opportunities daily to collect data in case of one-time failures.
 
 You can use [crontab.guru](https://crontab.guru/) to generate your own cron schedule.
+
+---
+
+## 📊 Output
+
+The scraped headlines are saved in:
+
+```
+data.json
+```
+
+Each entry includes a timestamp and the extracted headline. The file grows over time without overwriting previous data, enabling longitudinal analysis.
+
+---
+
+## 🛠️ Reliability & Monitoring
+
+The scraper is expected to run and collect data **daily until the end of finals**. It will be monitored through the GitHub Actions log. If it fails, I will:
+
+- Check the Actions logs  
+- Debug the error  
+- Push a fix and verify it runs successfully again  
+
+---
+
+## 📁 Files Included
+
+- `scraper.py`: Main Python scraper  
+- `data.json`: Output file (grows over time)  
+- `INITIAL-SCRAPER-EXPLANATION.pdf`: Code walkthrough  
+- `README.md`: This file  
+- `.github/workflows/scrape.yaml`: GitHub Actions automation  
+
+---
+
+## 📚 Possible Use Cases
+
+- What percentage of DP headlines are about sports vs. academics?  
+- How often does the most-read article change?  
+- Which articles remain popular over several days?  
+
+---
 
 ## Python Libraries
 
 The main libraries used are:
 
-- [`bs4`](https://www.crummy.com/software/BeautifulSoup/) - BeautifulSoup for parsing HTML
-- [`requests`](https://requests.readthedocs.io/en/latest/) - Making HTTP requests to scrape web pages
-- [`loguru`](https://github.com/Delgan/loguru) - Logging errors and run info
+- [`bs4`](https://www.crummy.com/software/BeautifulSoup/) - BeautifulSoup for parsing HTML  
+- [`requests`](https://requests.readthedocs.io/en/latest/) - Making HTTP requests to scrape web pages  
+- [`loguru`](https://github.com/Delgan/loguru) - Logging errors and run info  
 - [`pytz`](https://github.com/stub42/pytz) - Handling datetimes and timezones  
 - [`waybackpy`](https://github.com/akamhy/waybackpy/) - Scraping web archives (optional)
+
+---
 
 ## Getting Started
 
 To adapt this for your own scraping project:
 
-- Use [this template to create your own repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template#creating-a-repository-from-a-template)
-- Modify `script.py` to scrape different sites and data points:
-  - Modifying the request URL
-  - Parsing the HTML with BeautifulSoup to extract relevant data
-  - Processing and outputting the scraped data as CSV, JSON etc
-- Update the workflow schedule as needed
-- Output and commit the scraped data to CSV, JSON or other formats
-- Add any additional libraries to `Pipfile` that you need
+- Use [this template to create your own repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template#creating-a-repository-from-a-template)  
+- Modify `script.py` to scrape different sites and data points:  
+  - Modifying the request URL  
+  - Parsing the HTML with BeautifulSoup to extract relevant data  
+  - Processing and outputting the scraped data as CSV, JSON etc  
+- Update the workflow schedule as needed  
+- Output and commit the scraped data to CSV, JSON or other formats  
+- Add any additional libraries to `Pipfile` that you need  
 - Update this `README.md` with project specifics
 
 Feel free to use this as a starter kit for your Python web scraping projects!
+
+---
 
 ## Setting Up a Local Development
 
@@ -64,7 +164,7 @@ It is recommended to use a version manager, and virtual environments and environ
 
 **Pipenv** creates a **virtual environment** for your project to isolate its dependencies from other projects. This allows you to install packages safely without impacting globally installed packages that other tools or apps may rely on. The virtual env also allows reproducibility of builds across different systems.
 
-Below we detail how to setup these environments to develop this template scrape project locally.
+---
 
 ### Setting Up a Python Environment
 
@@ -86,6 +186,8 @@ After that, you can first install `pipenv` with:
 pip install pipenv
 ```
 
+---
+
 ### Installing Project Dependencies
 
 Then you can install the dependencies with:
@@ -96,6 +198,8 @@ pipenv install --dev
 
 This will create a virtual environment and install the dependencies from the `Pipfile`. The `--dev` flag will also install the development dependencies, which includes `ipykernel` for Jupyter Notebook support.
 
+---
+
 ### Running the Script
 
 You can then run the script to try it out with:
@@ -104,58 +208,29 @@ You can then run the script to try it out with:
 pipenv run python script.py
 ```
 
+---
+
 ## Licensing
 
 This software is distributed under the terms of the MIT License. You have the freedom to use, modify, distribute, and sell it for any purpose. However, you must include the original copyright notice and the permission notice found in the LICENSE file in all copies or substantial portions of the software.
 
 You can [read more about the MIT license](https://choosealicense.com/licenses/mit/), and [compare different open-source licenses at `choosealicense.com`](https://choosealicense.com/licenses/).
 
-## Some Ethical Guidelines to Consider
+---
+
+## 🧭 Some Ethical Guidelines to Consider
 
 Web scraping is a powerful tool for gathering data, and its [legality has been upheld](https://en.wikipedia.org/wiki/HiQ_Labs_v._LinkedIn).
 
 But it is important to use it responsibly and ethically. Here are some guidelines to consider:
 
-1. Review the website's Terms of Service and [`robots.txt`](https://en.wikipedia.org/wiki/robots.txt) file to understand allowances and restrictions for automated scraping before starting.
-
-2. Avoid scraping copyrighted content verbatim without permission. Summarizing is safer. Use data judiciously under "fair use" principles.
-
-3. Do not enable illegal or fraudulent uses of scraped data, and be mindful of security and privacy.
-
-4. Check that your scraping activity does not overload or harm the website's servers. Scale activity gradually.
-
-5. Reflect on whether scraping could unintentionally reveal private user or organizational information from the site.
-
-6. Consider if scraped data could negatively impact the website's value or business model.
-
-7. Assess if decisions made using the data could contribute to bias, discrimination or unfair profiling.
-
+1. Review the website's Terms of Service and [`robots.txt`](https://en.wikipedia.org/wiki/robots.txt) file to understand allowances and restrictions for automated scraping before starting.  
+2. Avoid scraping copyrighted content verbatim without permission. Summarizing is safer. Use data judiciously under "fair use" principles.  
+3. Do not enable illegal or fraudulent uses of scraped data, and be mindful of security and privacy.  
+4. Check that your scraping activity does not overload or harm the website's servers. Scale activity gradually.  
+5. Reflect on whether scraping could unintentionally reveal private user or organizational information from the site.  
+6. Consider if scraped data could negatively impact the website's value or business model.  
+7. Assess if decisions made using the data could contribute to bias, discrimination or unfair profiling.  
 8. Validate quality of scraped data, and recognize limitations in ensuring relevance and accuracy inherent with web data.  
-
-9. Document your scraping process thoroughly for replicability, transparency and accountability.
-
+9. Document your scraping process thoroughly for replicability, transparency and accountability.  
 10. Continuously re-evaluate your scraping program against applicable laws and ethical principles.
-
-### Scraper Update – Most Read Article
-
-Originally, the scraper pulled the main headline from the DP homepage. I updated it to instead scrape the **#1 most read article** from the “Most Read” section at the bottom of the homepage.
-
-This required:
-- Inspecting the HTML structure and identifying the CSS class `most-read`
-- Adding a user-agent header to bypass a 403 error
-- Extracting the text and link of the topmost `<a>` tag inside that section
-
-This change improves the scraper by targeting the content most interesting to readers rather than just the editorial top story.
-
-### GitHub Actions Schedule
-
-The cron expression means that the scraper will run twice a day: once at **03:00 UTC** and once at **15:00 UTC** every day.
-
-The five fields represent:
-- `minute` (0)
-- `hour` (3 and 15)
-- `day of month` (*, meaning every day)
-- `month` (*, meaning every month)
-- `day of week` (*, meaning every day of the week)
-
-This increases reliability by giving the scraper two opportunities daily to collect data in case of one-time failures.
