@@ -51,6 +51,16 @@ if __name__ == "__main__":
         "data/daily_pennsylvanian_headlines.json"
     )
 
+    # Check and create the file if it doesn't exist
+    if not os.path.exists(dem.file_path):
+        loguru.logger.warning(f"File {dem.file_path} does not exist. Creating an empty file.")
+        with open(dem.file_path, "w") as f:
+            f.write("[]")  # Initialize with an empty JSON array or appropriate content.
+
+    # Read and log the file contents
+    with open(dem.file_path, "r") as f:
+        loguru.logger.info(f.read())
+
     # Run scrape
     loguru.logger.info("Starting scrape")
     try:
