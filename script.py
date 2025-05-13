@@ -79,8 +79,13 @@ if __name__ == "__main__":
     print_tree(os.getcwd())
 
     loguru.logger.info("Printing contents of data file {}".format(dem.file_path))
-    with open(dem.file_path, "r") as f:
-        loguru.logger.info(f.read())
+    if not os.path.exists(dem.file_path):
+        loguru.logger.info(f"File {dem.file_path} does not exist. Creating an empty file.")
+        with open(dem.file_path, "w") as f:
+            f.write("{}")  # Write an empty JSON object or any initial content you need.
+
+with open(dem.file_path, "r") as f:
+    loguru.logger.info(f.read())
 
     # Finish
     loguru.logger.info("Scrape complete")
