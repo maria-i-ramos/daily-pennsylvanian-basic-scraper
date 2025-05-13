@@ -146,3 +146,16 @@ This required:
 - Extracting the text and link of the topmost `<a>` tag inside that section
 
 This change improves the scraper by targeting the content most interesting to readers rather than just the editorial top story.
+
+### GitHub Actions Schedule
+
+The cron expression means that the scraper will run twice a day: once at **03:00 UTC** and once at **15:00 UTC** every day.
+
+The five fields represent:
+- `minute` (0)
+- `hour` (3 and 15)
+- `day of month` (*, meaning every day)
+- `month` (*, meaning every month)
+- `day of week` (*, meaning every day of the week)
+
+This increases reliability by giving the scraper two opportunities daily to collect data in case of one-time failures.
