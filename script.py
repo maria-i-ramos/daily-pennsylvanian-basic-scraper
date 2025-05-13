@@ -9,27 +9,37 @@ import json  # Import JSON to handle file creation
 import daily_event_monitor
 
 import bs4
+from bs4 import BeautifulSoup
 import requests
 import loguru
 
 
 def scrape_data_point():
-    """
-    Scrapes the main headline from The Daily Pennsylvanian home page.
+    url = "https://www.thedp.com/"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+    }
 
-    Returns:
-        str: The headline text if found, otherwise an empty string.
-    """
-    req = requests.get("https://www.thedp.com")
-    loguru.logger.info(f"Request URL: {req.url}")
-    loguru.logger.info(f"Request status code: {req.status_code}")
+    response = requests.get(url, headers=headers)
+    print("Request status code:", response.status_code)
 
-    if req.ok:
-        soup = bs4.BeautifulSoup(req.text, "html.parser")
-        target_element = soup.find("a", class_="frontpage-link")
-        data_point = "" if target_element is None else target_element.text
-        loguru.logger.info(f"Data point: {data_point}")
-        return data_point
+    if response.status_code != 200:
+        raise Exception(f"Failed to fetch page. Status: {response.status_code}")
+
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    # Look for the "Most Read" list and grab the top article
+    most_read_section = soup.find("div", class_="most-read")
+    if not most_read_section:
+        raise Exception("Could not find Most Read section")
+
+    top_story = most_read_section.find("a")
+    if not top_story:
+        raise Exception("Could not find top story link in Most Read section")
+
+    headline = top_story.get_text(strip=True)
+    link = "https://www.thedp.com" + top_story['href']
+    return {"headline": headline, "url": link}
 
 
 if __name__ == "__main__":
