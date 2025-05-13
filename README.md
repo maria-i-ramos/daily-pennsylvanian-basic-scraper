@@ -135,3 +135,14 @@ But it is important to use it responsibly and ethically. Here are some guideline
 9. Document your scraping process thoroughly for replicability, transparency and accountability.
 
 10. Continuously re-evaluate your scraping program against applicable laws and ethical principles.
+
+### Scraper Update – Most Read Article
+
+Originally, the scraper pulled the main headline from the DP homepage. I updated it to instead scrape the **#1 most read article** from the “Most Read” section at the bottom of the homepage.
+
+This required:
+- Inspecting the HTML structure and identifying the CSS class `most-read`
+- Adding a user-agent header to bypass a 403 error
+- Extracting the text and link of the topmost `<a>` tag inside that section
+
+This change improves the scraper by targeting the content most interesting to readers rather than just the editorial top story.
